@@ -2,10 +2,10 @@
 // `st2 doctor` then reports it running + its task alive. The seat spawns into the eval's ambient
 // PTY_ROOT (hermetic), so the eval teardown reaps it — no orphan.
 agent "dev" {
-  host "hetz"
+  host "evalhost"
   role "worker"
   env {
-    ST_AGENT "hetz.dev"
+    ST_AGENT "evalhost.dev"
   }
   command "exec sleep 100000"
   ding

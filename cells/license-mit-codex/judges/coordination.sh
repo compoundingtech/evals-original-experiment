@@ -14,7 +14,7 @@ ROOT="${CATALOG:-$PWD}"
 SM="${ST_ROOT:?st2 eval must export ST_ROOT}"
 SUP_ID="${SUP_ID:-lmc.sup}"; WORKER_ID="${WORKER_ID:-lmc.worker}"; REQUESTER="${REQUESTER:-requester}"
 
-# Resolve an id to its on-disk bus dir, tolerating a host/team prefix (e.g. hetz.lmc.sup or lmc.sup).
+# Resolve an id to its on-disk bus dir, tolerating a host/team prefix (e.g. evalhost.lmc.sup or lmc.sup).
 busdir(){ local id="$1" d; d="$(ls -d "$SM"/*."$id" "$SM/$id" 2>/dev/null | head -1)"; printf '%s\n' "${d:-$SM/$id}"; }
 # messages in <owner>'s inbox+archive whose `from:` is <from>, tolerating a leading host/team prefix.
 msgs_from(){ local owner from; owner="$(busdir "$1")"; from="$2"
