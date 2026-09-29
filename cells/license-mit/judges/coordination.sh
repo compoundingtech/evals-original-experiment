@@ -14,7 +14,7 @@ ROOT="${CATALOG:-$PWD}"
 SM="${ST_ROOT:-$ROOT}"                                       # flat native st2 bus root
 SUP_ID="${SUP_ID:-mix.sup}"; WORKER_ID="${WORKER_ID:-mix.worker}"; REQUESTER="${REQUESTER:-requester}"
 
-# Resolve an id to its on-disk bus dir, tolerating a host/team prefix (e.g. hetz.mix.sup or mix.sup).
+# Resolve an id to its on-disk bus dir, tolerating a host/team prefix (e.g. evalhost.mix.sup or mix.sup).
 busdir(){ local id="$1" d; d="$(ls -d "$SM"/*."$id" "$SM/$id" 2>/dev/null | head -1)"; printf '%s\n' "${d:-$SM/$id}"; }
 # messages in <owner>'s inbox+archive whose `from:` is <from>, tolerating a leading host/team prefix.
 msgs_from(){ local owner from; owner="$(busdir "$1")"; from="$2"

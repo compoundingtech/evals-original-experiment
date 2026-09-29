@@ -6,13 +6,13 @@
 //       tasks as dead/missing + exits non-zero. Proves the gate is real, not always-pass. All judges held-out.
 
 eval {
-  copy "./fixture"                       // net/hetz/dev/agent.kdl — a minimal service seat for doctor to check
+  copy "./fixture"                       // net/evalhost/dev/agent.kdl — a minimal service seat for doctor to check
   max-timeout "60s"
 
   // HEALTHY: background st2 up (holds the lock + boots the seat), poll until doctor first passes, then the
   // FINAL doctor (captured) is the healthy assertion; kill up; the step's exit == doctor's exit.
   run "healthy" {
-    command #"sh -c 'st2 up --catalog "$CATALOG/net" --host hetz >/dev/null 2>&1 & UP=$!; trap "st2 down --catalog \"$CATALOG/net\" --host hetz >/dev/null 2>&1; kill $UP 2>/dev/null || true" EXIT; for i in $(seq 1 40); do st2 doctor --catalog "$CATALOG/net" --host hetz >/dev/null 2>&1 && break; sleep 0.4; done; st2 doctor --catalog "$CATALOG/net" --host hetz'"#
+    command #"sh -c 'st2 up --catalog "$CATALOG/net" --host evalhost >/dev/null 2>&1 & UP=$!; trap "st2 down --catalog \"$CATALOG/net\" --host evalhost >/dev/null 2>&1; kill $UP 2>/dev/null || true" EXIT; for i in $(seq 1 40); do st2 doctor --catalog "$CATALOG/net" --host evalhost >/dev/null 2>&1 && break; sleep 0.4; done; st2 doctor --catalog "$CATALOG/net" --host evalhost'"#
   }
   // BROKEN (mutation-valid): no supervisor lock is valid manual/--once mode, but the still-active declarations
   // retain task records whose sessions teardown made dead/missing. Doctor must FLAG both tasks + exit non-zero.
@@ -21,7 +21,7 @@ eval {
     // so it opts out — the exit propagates into $RUN_broken_EXIT for the judge to assert, and does NOT
     // hard-fail the run. (Also: NO trailing `; true` — the exit must reach the judge, not be masked.)
     allow-nonzero
-    command #"sh -c 'sleep 1; st2 doctor --catalog "$CATALOG/net" --host hetz'"#
+    command #"sh -c 'sleep 1; st2 doctor --catalog "$CATALOG/net" --host evalhost'"#
   }
 
   judges {
@@ -29,10 +29,10 @@ eval {
       exec "grep -q 'all checks passed' $RUNS_DIR/healthy.out"
     }
     judge "HEALTHY — both declared tasks are reported alive, with no dead/missing diagnostic" {
-      exec #"grep -Fq "✓ hetz.dev task 'agent' alive" "$RUNS_DIR/healthy.out" && grep -Fq "✓ hetz.dev task 'ding' alive" "$RUNS_DIR/healthy.out" && ! grep -Fq "session dead/missing" "$RUNS_DIR/healthy.out""#
+      exec #"grep -Fq "✓ evalhost.dev task 'agent' alive" "$RUNS_DIR/healthy.out" && grep -Fq "✓ evalhost.dev task 'ding' alive" "$RUNS_DIR/healthy.out" && ! grep -Fq "session dead/missing" "$RUNS_DIR/healthy.out""#
     }
     judge "MUTATION-VALID BROKEN — teardown makes both declared tasks dead/missing (the gate is real, not always-pass)" {
-      exec #"grep -Fq "✓ supervision mode manual/--once (no live host-lock)" "$RUNS_DIR/broken.out" && grep -Fq "✗ hetz.dev task 'agent' alive — session dead/missing" "$RUNS_DIR/broken.out" && grep -Fq "✗ hetz.dev task 'ding' alive — session dead/missing" "$RUNS_DIR/broken.out""#
+      exec #"grep -Fq "✓ supervision mode manual/--once (no live host-lock)" "$RUNS_DIR/broken.out" && grep -Fq "✗ evalhost.dev task 'agent' alive — session dead/missing" "$RUNS_DIR/broken.out" && grep -Fq "✗ evalhost.dev task 'ding' alive — session dead/missing" "$RUNS_DIR/broken.out""#
     }
     judge "the broken-case doctor exits NON-ZERO (fails-closed on a bad net)" {
       exec #"sh -c 'test "$RUN_broken_EXIT" != 0'"#

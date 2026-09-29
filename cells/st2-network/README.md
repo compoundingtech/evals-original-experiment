@@ -12,7 +12,7 @@ init/onboarding command yet).
 ## The scenario (team-less run-steps)
 
 `st2-network.kdl` is a `run { }` eval over a hand-authored native net fixture:
-- background `st2 up --catalog "$CATALOG/net" --host hetz` (the CLI host — it supervises the seat + holds the
+- background `st2 up --catalog "$CATALOG/net" --host evalhost` (the CLI host — it supervises the seat + holds the
   host-lock),
 - deliver a message to the hosted agent over the real bus,
 - assert the host is up and the message landed in the hosted agent's inbox, then explicitly tear it down.
